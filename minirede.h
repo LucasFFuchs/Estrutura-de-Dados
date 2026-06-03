@@ -28,11 +28,15 @@ struct Publicacao{
 };
 
 struct Usuario{
-    ListaUsuarios* seguidos;
+    int id;
     string name;
     string username;
-    Publicacao publicacoes;
-    int id;
+
+    Usuario* esq;
+    Usuario* dir;
+    Usuario* prox;
+    ListaUsuarios* seguidos;
+    Publicacao* publicacoes;
 };
 
 struct Notificacao{
@@ -41,23 +45,16 @@ struct Notificacao{
 };
 
 struct Fila{
-    Notificacao front;
+    Notificacao* front;
 }; 
 
-// TODO: definir as structs principais do trabalho.
-//
-// Sugestao de structs que provavelmente serao necessarias:
-// - Usuario
-// - Publicacao
-// - MiniRede
-// - nos para lista encadeada
-// - nos para arvore binaria de usuarios por id
-// - nos para tabela hash de usernames
-// - nos para fila de notificacoes
-//
-// Os campos de cada struct fazem parte do projeto dos alunos.
+
 
 struct MiniRede {
+    Usuario arvore;
+    Usuario* hash[10];
+
+    
     // TODO: declarar aqui os ponteiros/estruturas principais da rede.
     //
     // Exemplos de responsabilidades:

@@ -1,4 +1,5 @@
 #include "minirede.h"
+#include "estruturas.h"
 using namespace std;
 
 void inicializarMiniRede(MiniRede& rede) {
@@ -32,7 +33,13 @@ void processarComandos(MiniRede& rede, istream& entrada, ostream& saida) {
             
             buscarUsuarioPorId(rede, id, saida);
         }
-        else if(comando == "FIND_USERNAME"){}
+        else if(comando == "FIND_USERNAME"){
+            string username;
+
+            entrada >> username;
+
+            buscarUsuarioPorUsername(rede, username, saida);
+        }
         else if(comando == "LIST_USERS"){}
         else if(comando == "FOLLOW"){}
         else if(comando == "LIST_FOLLOWING"){}
@@ -54,14 +61,29 @@ void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeComple
     user -> username = username;
     user -> name = nomeCompleto;
 
+    user -> esq = nullptr;
+    user -> dir = nullptr;
+    user -> prox = nullptr;
+    user -> seguidos = nullptr;
+    user -> publicacoes = nullptr;
+
 }
 
 void buscarUsuarioPorId(MiniRede& rede, int id, ostream& saida) {
-    // TODO
+    
+    if(RetornaUser_BuscaIp() != nullptr){
+
+    }
+    else{
+        saida << "ERROR USER_NOT_FOUND";
+    }
 }
 
-void buscarUsuarioPorUsername(MiniRede& rede, const char username[], ostream& saida) {
-    // TODO
+void buscarUsuarioPorUsername(MiniRede& rede, string username, ostream& saida) {
+    Usuario* user = RetornaUser_BuscaUsername(rede, username);
+    if(user != nullptr){
+        saida << "USER " << user -> id << " " << user -> username << " " << user -> name;
+    }
 }
 
 void listarUsuarios(MiniRede& rede, ostream& saida) {
