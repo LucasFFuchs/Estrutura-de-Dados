@@ -2,10 +2,22 @@
 #define ESTRUTURAS_H
 #include "minirede.h"
 
-Usuario* RetornaUser_BuscaIp();
-Usuario* RetornaUser_BuscaUsername(MiniRede& rede, string username);
-
+Usuario* retornaUserBuscaUsername(MiniRede& rede, string username);
 int hash_function(string name);
+void insereUsername(MiniRede* rede, Usuario* user);
 
+Usuario* retornaUserBuscaIp(MiniRede& rede, int id);
+
+Usuario* rotacaoDireita(Usuario* p);
+Usuario* rotacaoEsquerda(Usuario* p);
+
+Usuario* casoEE(Usuario* p, bool& aumentouAltura);
+Usuario* casoED(Usuario* p, bool& aumentouAltura);
+Usuario* casoDD(Usuario* p, bool& aumentouAltura);
+Usuario* casoDE(Usuario* p, bool& aumentouAltura);
+
+Usuario* insereId(Usuario* raiz, Usuario* user, bool& aumentouAltura);
+
+void imprimirUsuarios(Usuario* user, ostream& saida);
 
 #endif

@@ -9,11 +9,25 @@ const int TAM_NOME = 100;
 const int TAM_TEXTO = 280;
 const int TAM_COMANDO = 30;
 
-struct ListaUsuarios{
-    ListaUsuarios* prox;
-    string nome;
-    string username;
+struct Usuario;
+struct Publicacao;
+
+struct Usuario{
     int id;
+    string name;
+    string username;
+
+    Usuario* esq;
+    Usuario* dir;
+
+    int FB;
+
+    Usuario* prox;
+    Usuario* prox_seguindo;
+    Usuario* prox_curtiram;
+    
+    Usuario* quemSigo;
+    Publicacao* publicacoes;
 };
 
 struct Publicacao{
@@ -23,20 +37,7 @@ struct Publicacao{
     int id_autor;
     string texto;
     int likes;
-    ListaUsuarios curtiram;
-    
-};
-
-struct Usuario{
-    int id;
-    string name;
-    string username;
-
-    Usuario* esq;
-    Usuario* dir;
-    Usuario* prox;
-    ListaUsuarios* seguidos;
-    Publicacao* publicacoes;
+    Usuario* curtidos;
 };
 
 struct Notificacao{
@@ -51,16 +52,8 @@ struct Fila{
 
 
 struct MiniRede {
-    Usuario arvore;
+    Usuario* arvore;
     Usuario* hash[10];
-
-    
-    // TODO: declarar aqui os ponteiros/estruturas principais da rede.
-    //
-    // Exemplos de responsabilidades:
-    // - usuarios armazenados por id
-    // - usuarios acessiveis por username
-    // - publicacoes cadastradas
 };
 
 void inicializarMiniRede(MiniRede& rede);
@@ -69,7 +62,7 @@ void processarComandos(MiniRede& rede, std::istream& entrada, std::ostream& said
 
 void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeCompleto, std::ostream& saida);
 void buscarUsuarioPorId(MiniRede& rede, int id, std::ostream& saida);
-void buscarUsuarioPorUsername(MiniRede& rede, const char username[], std::ostream& saida);
+void buscarUsuarioPorUsername(MiniRede& rede, string username, std::ostream& saida);
 void listarUsuarios(MiniRede& rede, std::ostream& saida);
 
 void seguirUsuario(MiniRede& rede, int idSeguidor, int idSeguido, std::ostream& saida);
