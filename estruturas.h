@@ -6,7 +6,7 @@ Usuario* retornaUserBuscaUsername(MiniRede& rede, string username);
 int hash_function(string name);
 void insereUsername(MiniRede* rede, Usuario* user);
 
-Usuario* retornaUserBuscaIp(MiniRede& rede, int id);
+Usuario* retornaUserBuscaId(MiniRede& rede, int id);
 
 Usuario* rotacaoDireita(Usuario* p);
 Usuario* rotacaoEsquerda(Usuario* p);
@@ -19,5 +19,10 @@ Usuario* casoDE(Usuario* p, bool& aumentouAltura);
 Usuario* insereId(Usuario* raiz, Usuario* user, bool& aumentouAltura);
 
 void imprimirUsuarios(Usuario* user, ostream& saida);
+
+bool postJaExiste(MiniRede rede, int idPost);
+void postarPublicacao(MiniRede rede, Publicacao* post);
+Publicacao* retornaPublicacao(MiniRede rede, int idPost);
+
 
 #endif

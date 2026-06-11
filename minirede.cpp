@@ -55,7 +55,14 @@ void processarComandos(MiniRede& rede, istream& entrada, ostream& saida) {
 
             listarSeguindo(rede, idSeguido, saida);
         }
-        else if(comando == "ADD_POST"){}
+        else if(comando == "ADD_POST"){
+            int idPost, idAutor, timestamp;
+            string texto;
+
+            entrada >> idPost >> idAutor >> timestamp, texto;
+
+            cadastrarPublicacao(rede, idPost, idAutor, timestamp, texto, saida);
+        }
         else if(comando == "LIKE"){}
         else if(comando == "GET_NOTIFICATIONS"){}
         else if(comando == "FEED"){}
@@ -68,7 +75,7 @@ void processarComandos(MiniRede& rede, istream& entrada, ostream& saida) {
 }
 
 void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeCompleto, ostream& saida) {
-    if(retornaUserBuscaIp(rede, id) != nullptr){
+    if(retornaUserBuscaId(rede, id) != nullptr){
         saida << "ERROR USER_EXISTS";
         return;
     }
@@ -81,11 +88,10 @@ void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeComple
     user -> esq = nullptr;
     user -> dir = nullptr;
     user -> prox = nullptr;
-    user -> quemSigo = nullptr;
-    user -> publicacoes = nullptr;
 
-    user -> prox_curtiram = nullptr;
-    user -> prox_seguindo = nullptr;
+    user -> quemSigo = nullptr;
+
+    user -> frontNotificacoes = nullptr;
 
     bool aumentouAltura = false;
 
@@ -97,7 +103,7 @@ void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeComple
 }
 
 void buscarUsuarioPorId(MiniRede& rede, int id, ostream& saida) {
-    Usuario* user = retornaUserBuscaIp(rede, id);
+    Usuario* user = retornaUserBuscaId(rede, id);
     if(user != nullptr){
         saida << "USER " << user -> id << " " << user -> username << " " << user -> name;
     }
@@ -123,7 +129,7 @@ void listarUsuarios(MiniRede& rede, ostream& saida) {
 }
 
 void seguirUsuario(MiniRede& rede, int idSeguidor, int idSeguido, ostream& saida) {
-    if(retornaUserBuscaIp(rede, idSeguidor) == nullptr || retornaUserBuscaIp(rede, idSeguido) == nullptr){
+    if(retornaUserBuscaId(rede, idSeguidor) == nullptr || retornaUserBuscaId(rede, idSeguido) == nullptr){
         saida << "ERROR USER_NOT_FOUND";
         return;
     }
@@ -132,33 +138,41 @@ void seguirUsuario(MiniRede& rede, int idSeguidor, int idSeguido, ostream& saida
         return;
     }
     
-    Usuario* seguido = retornaUserBuscaIp(rede, idSeguido);
-    Usuario* seguidor =  retornaUserBuscaIp(rede, idSeguidor);
-    Usuario* atual = seguidor -> quemSigo;
+    Usuario* seguido = retornaUserBuscaId(rede, idSeguido);
+    Usuario* seguidor =  retornaUserBuscaId(rede, idSeguidor);
+    UsuarioNo* seguidoNo;
+    UsuarioNo* seguidorNo;
+
+    seguidoNo -> prox = nullptr;
+    seguidorNo -> prox = nullptr;
+    seguidoNo -> user = seguido;
+    seguidorNo -> user = seguidor;
+
+    UsuarioNo* atual = seguidor -> quemSigo;
     if(atual == nullptr){
-        seguidor -> quemSigo = seguido;
+        seguidor -> quemSigo = seguidoNo;
         return;
     }
     
 
-    while(atual -> prox_seguindo != nullptr){
-        if(atual -> id == idSeguido){
+    while(atual -> prox != nullptr){
+        if(atual -> user -> id == idSeguido){
             saida << "ERROR CANNOT_FOLLOW_SELF";
             return;
         }
-        atual = atual -> prox_seguindo;
+        atual = atual -> prox;
     }
-    if(atual -> id == idSeguido){
+    if(atual -> user -> id == idSeguido){
         saida << "ERROR CANNOT_FOLLOW_SELF";
         return;
     }
     
-    atual -> prox_seguindo = seguido;
+    atual -> prox = seguidoNo;
     saida << "FOLLOWED";    
 }
 
 void listarSeguindo(MiniRede& rede, int idUsuario, ostream& saida) {
-    Usuario* user = retornaUserBuscaIp(rede, idUsuario);
+    Usuario* user = retornaUserBuscaId(rede, idUsuario);
 
     if(user == nullptr){
         saida << "ERROR USER_NOT_FOUND";
@@ -167,21 +181,69 @@ void listarSeguindo(MiniRede& rede, int idUsuario, ostream& saida) {
 
     saida << "FOLLOWING_BEGIN";
 
-    Usuario* atual = user -> quemSigo;
+    UsuarioNo* atual = user -> quemSigo;
     while(atual != nullptr){
-        saida << "USER " << atual -> id << " " << atual -> username << " " << atual -> name;
-        atual = atual -> prox_seguindo;
+        saida << "USER " << atual -> user -> id << " " << 
+        atual -> user -> username << " " << atual -> user -> name;
+        atual  = atual -> prox;
     }
 
     saida << "FOLLOWING_END";
 }
 
-void cadastrarPublicacao(MiniRede& rede, int idPost, int idAutor, int timestamp, const char texto[], ostream& saida) {
-    // TODO
+void cadastrarPublicacao(MiniRede& rede, int idPost, int idAutor, int timestamp, string texto, ostream& saida) {
+    Usuario* user = retornaUserBuscaId(rede, idAutor);
+    if(user == nullptr){
+        saida << "ERROR USER_NOT_FOUND";
+        return;
+    }
+    if(postJaExiste(rede, idPost)){
+        saida << "ERROR POST_EXISTS";
+        return;
+    }
+    Publicacao* post = new Publicacao;
+    post -> timestamp = timestamp;
+    post -> id = idPost;
+    post -> id_autor = idAutor;
+    post -> likes = 0;
+    post -> texto = texto;
+
+    post -> prox = nullptr;
+    post -> quemCurtiu = nullptr;
+
+    postarPublicacao(rede, post);
+    saida << "POST_ADDED";
 }
 
 void curtirPublicacao(MiniRede& rede, int idUsuario, int idPost, ostream& saida) {
-    // TODO
+    Usuario* user = retornaUserBuscaId(rede, idUsuario);
+    UsuarioNo* userNo;
+    userNo -> prox = nullptr;
+    userNo -> user = user;
+
+    if(user == nullptr){
+        saida << "ERROR USER_NOT_FOUND";
+        return;
+    }
+    if(!postJaExiste(rede, idPost)){
+        saida << "ERROR POST_NOT_FOUND";
+        return;
+    }
+    Publicacao* post = retornaPublicacao(rede, idPost);
+    UsuarioNo* atual = post -> quemCurtiu;
+    if(atual == nullptr){
+        post -> quemCurtiu = userNo;
+        post -> likes++;
+        return;
+    }
+    while(atual -> prox != nullptr){
+        if(atual -> user -> id == idUsuario){
+            saida << "ERROR ALREADY_LIKED";
+        }
+        atual = atual -> prox;
+    }
+    post -> likes++;
+    atual -> prox = userNo;
 }
 
 void consultarNotificacoes(MiniRede& rede, int idUsuario, int k, ostream& saida) {

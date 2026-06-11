@@ -31,7 +31,7 @@ void insereUsername(MiniRede* rede, Usuario* user){
     rede -> hash[hash_function(user -> username)] = user;
 }
 
-Usuario* retornaUserBuscaIp(MiniRede& rede, int id){
+Usuario* retornaUserBuscaId(MiniRede& rede, int id){
     Usuario* atual = rede.arvore;
     while (atual != nullptr) {
         if (atual -> id == id) {
@@ -230,4 +230,38 @@ void imprimirUsuarios(Usuario* user, ostream& saida){
     imprimirUsuarios(user -> esq, saida);
     saida << "USER " << user -> id << " " << user -> username << " " << user -> name;
     imprimirUsuarios(user -> dir, saida);
+}
+
+bool postJaExiste(MiniRede rede, int idPost){
+    Publicacao* postAtual = rede.publicacoes; 
+    while(postAtual != nullptr){
+        if(postAtual -> id == idPost)
+            return true;
+        postAtual = postAtual -> prox;
+    }
+    return false;
+}
+
+void postarPublicacao(MiniRede* rede, Publicacao* post){
+    if(rede -> publicacoes == nullptr){
+        rede -> publicacoes = post;
+        return;
+    }
+    Publicacao* atual = rede -> publicacoes;
+    while(atual -> prox != nullptr){
+        atual = atual -> prox;
+    }
+
+    atual -> prox = post;
+}
+
+Publicacao* retornaPublicacao(MiniRede rede, int idPost){
+    Publicacao* atual = rede.publicacoes;
+    while(atual != nullptr){
+        if(atual -> id == idPost){
+            return atual;
+        }
+        atual = atual -> prox;
+    }
+    return nullptr;
 }
