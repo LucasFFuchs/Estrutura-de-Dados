@@ -19,7 +19,7 @@ int hash_function(string name){
     for(unsigned int i = 0; i < name.length(); i++){
         soma += name[i];
     }
-    return (soma & 10);
+    return (soma % 10);
 }
 
 void insereUsername(MiniRede* rede, Usuario* user){
@@ -228,11 +228,11 @@ void imprimirUsuarios(Usuario* user, ostream& saida){
     if(user == nullptr)
         return;
     imprimirUsuarios(user -> esq, saida);
-    saida << "USER " << user -> id << " " << user -> username << " " << user -> name;
+    saida << "USER " << user -> id << " " << user -> username << " " << user -> name << "\n";
     imprimirUsuarios(user -> dir, saida);
 }
 
-bool postJaExiste(MiniRede rede, int idPost){
+bool postJaExiste(MiniRede& rede, int idPost){
     Publicacao* postAtual = rede.publicacoes; 
     while(postAtual != nullptr){
         if(postAtual -> id == idPost)
@@ -255,7 +255,7 @@ void postarPublicacao(MiniRede* rede, Publicacao* post){
     atual -> prox = post;
 }
 
-Publicacao* retornaPublicacao(MiniRede rede, int idPost){
+Publicacao* retornaPublicacao(MiniRede& rede, int idPost){
     Publicacao* atual = rede.publicacoes;
     while(atual != nullptr){
         if(atual -> id == idPost){
@@ -264,4 +264,22 @@ Publicacao* retornaPublicacao(MiniRede rede, int idPost){
         atual = atual -> prox;
     }
     return nullptr;
+}
+
+void adicionarNotificacao(Usuario* user, string texto){
+    Notificacao* novo = new Notificacao;
+    novo -> prox = nullptr;
+    novo -> texto = texto;
+
+    Notificacao* atual = user -> frontNotificacoes;
+    if(atual == nullptr){
+        user -> frontNotificacoes = novo;
+        return;
+    }
+
+    while(atual -> prox != nullptr){
+        atual = atual -> prox;
+    }
+
+    atual -> prox = novo;
 }

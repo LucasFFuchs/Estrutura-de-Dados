@@ -20,9 +20,11 @@ Usuario* insereId(Usuario* raiz, Usuario* user, bool& aumentouAltura);
 
 void imprimirUsuarios(Usuario* user, ostream& saida);
 
-bool postJaExiste(MiniRede rede, int idPost);
-void postarPublicacao(MiniRede rede, Publicacao* post);
-Publicacao* retornaPublicacao(MiniRede rede, int idPost);
+bool postJaExiste(MiniRede& rede, int idPost);
+void postarPublicacao(MiniRede* rede, Publicacao* post);
+Publicacao* retornaPublicacao(MiniRede& rede, int idPost);
+
+void adicionarNotificacao(Usuario* user, string texto);
 
 
 #endif
