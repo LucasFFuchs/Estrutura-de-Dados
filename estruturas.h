@@ -19,7 +19,7 @@ Usuario* casoDE(Usuario* p, bool& aumentouAltura);
 Usuario* insereId(Usuario* raiz, Usuario* user, bool& aumentouAltura);
 
 void imprimirUsuarios(Usuario* user, ostream& saida);
-
+void ordenaNotificacao(Usuario* user, string conteudo);
 bool postJaExiste(MiniRede rede, int idPost);
 void postarPublicacao(MiniRede rede, Publicacao* post);
 Publicacao* retornaPublicacao(MiniRede rede, int idPost);

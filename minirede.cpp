@@ -246,16 +246,193 @@ void curtirPublicacao(MiniRede& rede, int idUsuario, int idPost, ostream& saida)
     atual -> prox = userNo;
 }
 
+void ordenaNotificacao(Usuario* user, string conteudo){
+     Notificacao* nova = new Notificacao;
+     nova -> texto = conteudo;
+     nova -> prox = nullptr;
+
+    if(user -> frontNotificacoes == nullptr){
+        user -> frontNotificacoes = nova;
+        return;
+
+    }
+
+    Notificacao* atual = user -> frontNotificacoes;
+    while(atual -> prox != nullptr){
+        atual =atual -> prox;
+    }
+    atual -> prox = nova;
+}
+
 void consultarNotificacoes(MiniRede& rede, int idUsuario, int k, ostream& saida) {
-    // TODO
+    Usuario* user = retornaUserBuscaId(rede, idUsuario);
+    if(user == nullptr){
+        saida << " ERROR_USER_/NOT_FOUD";
+        return;
+    }
+
+    saida << "NOTIFICATIONS_BEGIN\n";
+
+    int count = 0;
+
+    while(user -> frontNotificacoes != nullptr && count < k){
+        Notificacao* atual = user -> frontNotificacoes;
+
+        saida << "NOTIFICATION" << atual -> texto << "\n";
+
+        user -> frontNotificacaoes = atual -> prox;
+        delete atual;
+
+        count++;
+
+        
+    }
+
+    saida << "NOTIFICATIONS_END";   
+
 }
 
 void gerarFeed(MiniRede& rede, int idUsuario, int k, ostream& saida) {
-    // TODO
+        Usuario* user = retornaUserBuscaId(rede, idUsuario);
+
+    if(user == nullptr){
+        saida << "ERROR USER_NOT_FOUND\n";
+        return;
+    }
+
+    saida << "FEED_BEGIN\n";
+
+    int max = 0;  //CONTA O TOTAL DE PUBLICACOES 
+    Publicacao* p = rede.publicacoes;
+
+    while(p != nullptr){
+        max++;
+        p = p->prox;
+    }
+
+
+    Publicacao** feed = new Publicacao*[max]; //ARRAY DE PUIBLIVCACOES
+    int tam = 0;
+
+    
+    UsuarioNo* seg = user->quemSigo;
+
+    while(seg != nullptr){
+
+        int idSeguido = seg->user->id;
+        Publicacao* post = rede.publicacoes;
+
+        while(post != nullptr){
+            if(post->id_autor == idSeguido){
+                feed[tam++] = post;
+            }
+            post = post->prox;
+        }
+
+        seg = seg->prox;
+    }
+
+
+    for(int i = 0; i < tam - 1; i++){ // ORDENAÇÃO DO TIMESTAMP ETC...
+        for(int j = 0; j < tam - i - 1; j++){
+
+            bool troca = false;
+
+            if(feed[j]->timestamp < feed[j+1]->timestamp){
+                troca = true;
+            }
+            else if(feed[j]->timestamp == feed[j+1]->timestamp &&
+                    feed[j]->id > feed[j+1]->id){
+                troca = true;
+            }
+
+            if(troca){
+                Publicacao* aux = feed[j];
+                feed[j] = feed[j+1];
+                feed[j+1] = aux;
+            }
+        }
+    }
+
+    
+    int limite = (tam < k ? tam : k); //IMPRIME ATE O LIMITE DE K
+
+    for(int i = 0; i < limite; i++){
+        Publicacao* p = feed[i];
+
+        saida << "POST "
+              << p->id << " "
+              << p->id_autor << " "
+              << p->timestamp << " "
+              << p->likes << " "
+              << p->texto << "\n";
+    }
+
+    saida << "FEED_END\n";
+
+    delete[] feed;
 }
 
+
 void listarTopPosts(MiniRede& rede, int k, ostream& saida) {
-    // TODO
+    saida << "TOP_POSTS_BEGIN\n";
+
+   //CONFA OS POSTS
+    int max = 0;
+    Publicacao* p = rede.publicacoes;
+
+    while(p != nullptr){
+        max++;
+        p = p->prox;
+    }
+
+    Publicacao** arr = new Publicacao*[max];
+    int tam = 0;
+
+    p = rede.publicacoes;
+
+    while(p != nullptr){
+        arr[tam++] = p;
+        p = p->prox;
+    }
+
+    for(int i = 0; i < tam - 1; i++){ //ORDENA OS LIKES
+        for(int j = 0; j < tam - i - 1; j++){
+
+            bool troca = false;
+
+            if(arr[j]->likes < arr[j+1]->likes){
+                troca = true;
+            }
+            else if(arr[j]->likes == arr[j+1]->likes &&
+                    arr[j]->id > arr[j+1]->id){
+                troca = true;
+            }
+
+            if(troca){
+                Publicacao* aux = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = aux;
+            }
+        }
+    }
+
+    int limite = (tam < k ? tam : k);
+
+    for(int i = 0; i < limite; i++){
+        Publicacao* p = arr[i];
+
+        saida << "POST "
+              << p->id << " "
+              << p->id_autor << " "
+              << p->timestamp << " "
+              << p->likes << " "
+              << p->texto << "\n";
+    }
+
+    saida << "TOP_POSTS_END\n";
+
+    delete[] arr;
 }
 
 int main() {
