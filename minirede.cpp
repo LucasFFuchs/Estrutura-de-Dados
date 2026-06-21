@@ -1,5 +1,6 @@
 #include "minirede.h"
 #include "estruturas.h"
+#include <sstream>
 using namespace std;
 
 void inicializarMiniRede(MiniRede& rede) {
@@ -11,75 +12,227 @@ void inicializarMiniRede(MiniRede& rede) {
 }
 
 void liberarMiniRede(MiniRede& rede) {
-    // TODO
+    deletaFilhos(rede.arvore);
+    rede.arvore = nullptr;
+
+    Usuario* atual;
+    Usuario* deletar;
+    for(int i = 0; i < 10; i++){
+        atual = rede.hash[i];
+
+        while(atual != nullptr){
+            deletar = atual;
+            atual = atual -> prox;
+            delete deletar;
+        }
+    }
+
+    Publicacao* atual2 = rede.publicacoes; 
+    Publicacao* deletar2;
+    
+    while(atual != nullptr){
+        UsuarioNo* atual3 = atual2 -> quemCurtiu;
+        UsuarioNo* deletar3;
+        
+        while(atual3 != nullptr){
+            deletar3 = atual3;
+            atual3 = atual3 -> prox;
+            delete deletar3;
+        }
+        
+        deletar2 = atual2;
+        atual2 = atual2 -> prox;
+        delete deletar2;
+    }
+
 }
 
 void processarComandos(MiniRede& rede, istream& entrada, ostream& saida) {
     string comando;
 
     while (entrada >> comando && comando != "END"){
+        string linha;
+        getline(entrada, linha);
+        istringstream iss(linha);
 
         if(comando == "ADD_USER"){
             int id;
             string username;
             string nome;
 
-            entrada >> id >> username >> nome;
+            if (!(iss >> id >> username >> nome)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             cadastrarUsuario(rede, id, username, nome, saida);
         }
         else if(comando == "FIND_USER"){
             int id;
 
-            entrada >> id;
+            if (!(iss >> id)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             buscarUsuarioPorId(rede, id, saida);
         }
         else if(comando == "FIND_USERNAME"){
             string username;
 
-            entrada >> username;
+            if (!(iss >> username)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             buscarUsuarioPorUsername(rede, username, saida);
         }
         else if(comando == "LIST_USERS"){
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
             listarUsuarios(rede, saida);
         }
         else if(comando == "FOLLOW"){
             int idSeguidor, idSeguido;
-            
-            entrada >> idSeguidor >> idSeguido;
+
+            if (!(iss >> idSeguidor >> idSeguido)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             seguirUsuario(rede, idSeguidor, idSeguido, saida);
         }
         else if(comando == "LIST_FOLLOWING"){
             int idSeguido;
 
-            entrada >> idSeguido;
+            if (!(iss >> idSeguido)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             listarSeguindo(rede, idSeguido, saida);
         }
         else if(comando == "ADD_POST"){
             int idPost, idAutor, timestamp;
             string texto;
 
-            entrada >> idPost >> idAutor >> timestamp >> texto;
+            if (!(iss >> idPost >> idAutor >> timestamp >> texto)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             cadastrarPublicacao(rede, idPost, idAutor, timestamp, texto, saida);
         }
         else if(comando == "LIKE"){
             int idUsuario, idPost;
 
-            entrada >> idUsuario >> idPost;
+            if (!(iss >> idUsuario >> idPost)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             curtirPublicacao(rede, idUsuario, idPost, saida);
         }
         else if(comando == "GET_NOTIFICATIONS"){
             int idUsuario, k;
 
-            entrada >> idUsuario >> k;
+            if (!(iss >> idUsuario >> k)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
             consultarNotificacoes(rede, idUsuario, k, saida);
         }
-        else if(comando == "FEED"){}
-        else if(comando == "TOP_POSTS"){}
+        else if(comando == "FEED"){
+            int idUsuario, k;
+            
+            if (!(iss >> idUsuario >> k)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            gerarFeed(rede, idUsuario, k, saida);
+        }
+        else if(comando == "TOP_POSTS"){
+            int k;
+            if (!(iss >>  k)) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            string sobra;
+            if (iss >> sobra) {
+                saida << "ERROR INVALID_COMMAND\n";
+                continue;
+            }
+
+            listarTopPosts(rede, k, saida);
+        }
+        else{
+            saida << "ERROR INVALID_COMMAND\n";
+        }
     }
 }
 
 void cadastrarUsuario(MiniRede& rede, int id, string username, string nomeCompleto, ostream& saida) {
-    if(retornaUserBuscaId(rede, id) != nullptr){
+    if(retornaUserBuscaId(rede, id) != nullptr || retornaUserBuscaUsername(rede, username) != nullptr){
         saida << "ERROR USER_EXISTS\n";
         return;
     }
@@ -150,7 +303,7 @@ void seguirUsuario(MiniRede& rede, int idSeguidor, int idSeguido, ostream& saida
     UsuarioNo* atual = seguidor -> quemSigo;
     if(atual == nullptr){
         seguidor -> quemSigo = seguidoNo;
-        adicionarNotificacao(seguido, "NOTIFICATIONS FOLLOW " + to_string(seguidor -> id) + "\n");
+        adicionarNotificacao(seguido, "NOTIFICATION FOLLOW " + to_string(seguidor -> id) + "\n");
         saida << "FOLLOWED\n";
         return;
     }
@@ -170,7 +323,7 @@ void seguirUsuario(MiniRede& rede, int idSeguidor, int idSeguido, ostream& saida
     }
     
     atual -> prox = seguidoNo;
-    adicionarNotificacao(seguido, "NOTIFICATIONS FOLLOW " + to_string(seguidor -> id) + "\n");
+    adicionarNotificacao(seguido, "NOTIFICATION FOLLOW " + to_string(seguidor -> id) + "\n");
     saida << "FOLLOWED\n";    
 }
 
@@ -293,11 +446,154 @@ void consultarNotificacoes(MiniRede& rede, int idUsuario, int k, ostream& saida)
 }
 
 void gerarFeed(MiniRede& rede, int idUsuario, int k, ostream& saida) {
-    // TODO
+        Usuario* user = retornaUserBuscaId(rede, idUsuario);
+
+    if(user == nullptr){
+        saida << "ERROR USER_NOT_FOUND\n";
+        return;
+    }
+
+    saida << "FEED_BEGIN\n";
+
+    int max = 0;  //CONTA O TOTAL DE PUBLICACOES 
+    Publicacao* p = rede.publicacoes;
+
+    while(p != nullptr){
+        max++;
+        p = p -> prox;
+    }
+
+
+    Publicacao** feed = new Publicacao*[max]; //ARRAY DE PUBLICACOES
+    int tam = 0;
+
+    
+    UsuarioNo* seg = user -> quemSigo;
+
+    while(seg != nullptr){
+
+        int idSeguido = seg -> user -> id;
+        Publicacao* post = rede.publicacoes;
+
+        while(post != nullptr){
+            if(post -> id_autor == idSeguido){
+                feed[tam] = post;
+                tam++;
+            }
+            post = post -> prox;
+        }
+
+        seg = seg -> prox;
+    }
+
+
+    for(int i = 0; i < tam - 1; i++){ // ORDENAÇÃO DO TIMESTAMP ETC...
+        for(int j = 0; j < tam - i - 1; j++){
+
+            bool troca = false;
+
+            if(feed[j] -> timestamp < feed[j+1] -> timestamp){
+                troca = true;
+            }
+            else if(feed[j] -> timestamp == feed[j+1] -> timestamp &&
+                    feed[j] -> id > feed[j+1] -> id){
+                troca = true;
+            }
+
+            if(troca){
+                Publicacao* aux = feed[j];
+                feed[j] = feed[j+1];
+                feed[j+1] = aux;
+            }
+        }
+    }
+
+    int limite;
+    if(tam < k)
+        limite = tam;
+    else
+        limite = k;
+
+    for(int i = 0; i < limite; i++){
+        Publicacao* p = feed[i];
+
+        saida << "POST "
+              << p -> id << " "
+              << p -> id_autor << " "
+              << p -> timestamp << " "
+              << p -> likes << " "
+              << p -> texto << "\n";
+    }
+
+    saida << "FEED_END\n";
+
+    delete[] feed;
 }
 
-void listarTopPosts(MiniRede& rede, int k, ostream& saida) {
-    // TODO
+
+void listarTopPosts(MiniRede& rede, int k, ostream& saida){
+    saida << "TOP_POSTS_BEGIN\n";
+
+   //CONTA OS POSTS
+    int max = 0;
+    Publicacao* p = rede.publicacoes;
+
+    while(p != nullptr){
+        max++;
+        p = p->prox;
+    }
+
+    Publicacao** arr = new Publicacao*[max];
+    int tam = 0;
+
+    p = rede.publicacoes;
+
+    while(p != nullptr){
+        arr[tam++] = p;
+        p = p -> prox;
+    }
+
+    for(int i = 0; i < tam - 1; i++){ //ORDENA OS LIKES
+        for(int j = 0; j < tam - i - 1; j++){
+
+            bool troca = false;
+
+            if(arr[j] -> likes < arr[j+1] -> likes){
+                troca = true;
+            }
+            else if(arr[j] -> likes == arr[j+1] -> likes &&
+                    arr[j] -> id > arr[j+1] -> id){
+                troca = true;
+            }
+
+            if(troca){
+                Publicacao* aux = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = aux;
+            }
+        }
+    }
+
+    int limite;
+    if(tam < k)
+        limite = tam;
+    else
+        limite = k;
+
+    for(int i = 0; i < limite; i++){
+        Publicacao* p = arr[i];
+
+        saida << "POST "
+              << p->id << " "
+              << p->id_autor << " "
+              << p->timestamp << " "
+              << p->likes << " "
+              << p->texto << "\n";
+    }
+
+    saida << "TOP_POSTS_END\n";
+
+    delete[] arr;
 }
 
 int main() {

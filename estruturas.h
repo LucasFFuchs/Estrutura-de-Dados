@@ -26,5 +26,6 @@ Publicacao* retornaPublicacao(MiniRede& rede, int idPost);
 
 void adicionarNotificacao(Usuario* user, string texto);
 
+void deletaFilhos(Usuario* no);
 
 #endif

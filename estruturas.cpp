@@ -283,3 +283,30 @@ void adicionarNotificacao(Usuario* user, string texto){
 
     atual -> prox = novo;
 }
+
+void deletaFilhos(Usuario* no){
+    if(no == nullptr)
+        return;
+    deletaFilhos(no -> esq);
+    deletaFilhos(no -> dir);
+
+    UsuarioNo* atual = no -> quemSigo; //Deleta Usuarios nós de quem eu sigo
+    UsuarioNo* deletar;
+
+    while(atual != nullptr){
+        deletar = atual;
+        atual = atual -> prox;
+        delete deletar;
+    }
+
+    Notificacao* atual2 = no -> frontNotificacoes; //Deleta notificacoes nao vistas
+    Notificacao* deletar2;
+
+    while(atual2 != nullptr){
+        deletar2 = atual2;
+        atual2 = atual2 -> prox;
+        delete deletar2;
+    }
+    delete no; //Deleta usuario
+}
+
