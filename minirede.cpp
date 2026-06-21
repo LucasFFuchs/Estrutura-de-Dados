@@ -417,6 +417,24 @@ void curtirPublicacao(MiniRede& rede, int idUsuario, int idPost, ostream& saida)
                          "NOTIFICATION LIKE " + to_string(idUsuario) + " " + to_string(idPost) + "\n");
 }
 
+void ordenaNotificacao(Usuario* user, string conteudo){
+     Notificacao* nova = new Notificacao;
+     nova -> texto = conteudo;
+     nova -> prox = nullptr;
+
+    if(user -> frontNotificacoes == nullptr){
+        user -> frontNotificacoes = nova;
+        return;
+
+    }
+
+    Notificacao* atual = user -> frontNotificacoes;
+    while(atual -> prox != nullptr){
+        atual =atual -> prox;
+    }
+    atual -> prox = nova;
+}
+
 void consultarNotificacoes(MiniRede& rede, int idUsuario, int k, ostream& saida) {
     Usuario* user = retornaUserBuscaId(rede, idUsuario);
     if(user == nullptr){
